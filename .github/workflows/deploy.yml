@@ -1,0 +1,41 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create setup script with secrets
+        run: |
+          sed -i "s/NEW_USER=\"youruser\"/NEW_USER=\"${{ secrets.VPS_USER }}\"/" setup.sh
+          sed -i "s/SSH_PUBLIC_KEY=\"your-public-key-content\"/SSH_PUBLIC_KEY=\"${{ secrets.SSH_PUBLIC_KEY }}\"/" setup.sh
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          password: ${{ secrets.VPS_ROOT_PASSWORD }}
+          script: |
+            # Create temporary directory
+            TEMP_DIR=$(mktemp -d)
+            cd $TEMP_DIR
+
+            # Copy setup script from repository
+            cat > setup.sh << 'EOL'
+            ${{ github.workspace }}/setup.sh
+            EOL
+
+            # Make script executable and run it
+            chmod +x setup.sh
+            ./setup.sh
+
+            # Cleanup
+            cd /
+            rm -rf $TEMP_DIR
