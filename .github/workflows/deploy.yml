@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches: [main]
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -11,38 +11,37 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Create setup script with secrets
-        run: |
-          sed -i "s/NEW_USER=\"youruser\"/NEW_USER=\"${{ secrets.VPS_USER }}\"/" setup.sh
-          sed -i "s/NEW_USER_PASSWORD=\"your-secure-password\"/NEW_USER_PASSWORD=\"${{ secrets.VPS_USER_PASSWORD }}\"/" setup.sh
-          sed -i "s/SSH_PUBLIC_KEY=\"your-public-key-content\"/SSH_PUBLIC_KEY=\"${{ secrets.SSH_PUBLIC_KEY }}\"/" setup.sh
-
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
+        env:
+          NEW_USER: ${{ secrets.VPS_USER }}
+          NEW_USER_PASSWORD: ${{ secrets.VPS_USER_PASSWORD }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+          INSTALL_COOLIFY: ${{ secrets.INSTALL_COOLIFY }}
+          AUTO_REBOOT: ${{ secrets.AUTO_REBOOT }}
+          REMOVE_UNUSED_DEPS: ${{ secrets.REMOVE_UNUSED_DEPS }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: root
           password: ${{ secrets.VPS_ROOT_PASSWORD }}
+          envs: NEW_USER,NEW_USER_PASSWORD,SSH_PUBLIC_KEY,INSTALL_COOLIFY,AUTO_REBOOT,REMOVE_UNUSED_DEPS
           script: |
-            # Create temporary directory
             TEMP_DIR=$(mktemp -d)
             cd $TEMP_DIR
-
-            # Copy setup script from repository
             cat > setup.sh << 'EOL'
             ${{ github.workspace }}/setup.sh
             EOL
-
-            # Make script executable and run it
             chmod +x setup.sh
             ./setup.sh
-
-            # Cleanup
             cd /
             rm -rf $TEMP_DIR
 
       - name: Post-setup instructions
-          run: |
-            echo "🎉 Setup completed!"
-            echo "⚠️ IMPORTANT: After verifying SSH key access works, disable password authentication:"
-            echo "ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'sudo sed -i \"s/PasswordAuthentication yes/PasswordAuthentication no/\" /etc/ssh/sshd_config && sudo systemctl restart sshd'"
+        run: |
+          echo "🎉 Setup completed!"
+          echo "⚠️ IMPORTANT: After verifying SSH key access works, disable password authentication:"
+          echo "ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'sudo sed -i \"s/PasswordAuthentication yes/PasswordAuthentication no/\" /etc/ssh/sshd_config && sudo systemctl restart sshd'"
+          if [ "${INSTALL_COOLIFY}" = "true" ]; then
+            echo "⚠️ After configuring your domain in Coolify, remove temporary ports:"
+            echo "ssh $NEW_USER@<your-vps-ip> 'sudo ufw delete allow 8000/tcp && sudo ufw delete allow 6001/tcp && sudo ufw delete allow 6002/tcp'"
+          fi

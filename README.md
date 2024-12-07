@@ -24,6 +24,11 @@ This repository contains automation scripts to set up a secure Debian-based VPS 
   - Sets up unattended-upgrades with email notifications
   - Automatic system cleanup
 
+- **Coolify Installation (Optional)**
+  - Install Coolify
+  - Open temporary ports (8000, 6001, 6002)
+  - Provide instructions for securing after domain setup
+
 ## 🚀 Usage
 
 ### 1. Fork this Repository
@@ -37,22 +42,15 @@ In your forked repository, go to Settings > Secrets and variables > Actions and 
 - `VPS_USER`: Desired username for the non-root user
 - `VPS_USER_PASSWORD`: Password for the new user
 - `SSH_PUBLIC_KEY`: Your SSH public key content (from `~/.ssh/id_rsa.pub`)
-
-Example values:
-```bash
-VPS_HOST: 123.456.789.0
-VPS_ROOT_PASSWORD: your-initial-root-password
-VPS_USER: john
-VPS_USER_PASSWORD: your-secure-user-password
-SSH_PUBLIC_KEY: ssh-rsa AAAAB3NzaC1... john@localhost
-```
+- `INSTALL_COOLIFY`: Set to "true" to install Coolify, "false" to skip (defaults to "false")
+- `AUTO_REBOOT`: Set to "true" for automatic reboot after system updates, "false" to skip (defaults to "false")
+- `REMOVE_UNUSED_DEPS`: Set to "true" to remove unused dependencies, "false" to skip (defaults to "false")
 
 ⚠️ Security Note:
 - Never commit these values directly to the repository
 - Always use GitHub Secrets for sensitive information
 - Use strong passwords for both root and user accounts
 - Keep your SSH private key secure
-
 
 ### 3. Deploy
 The setup will automatically deploy when you push to the main branch, or you can manually trigger it from the Actions tab.
@@ -77,6 +75,19 @@ ssh your-user@your-vps-host 'sudo sed -i "s/PasswordAuthentication yes/PasswordA
 - Store your VPS root password securely (in case of emergencies)
 - Monitor the GitHub Actions logs for the setup result
 
+#### Coolify Configuration
+
+The setup includes an optional Coolify installation with temporary open ports:
+- 8000/tcp: Coolify Web UI
+- 6001/tcp: Coolify Websocket
+- 6002/tcp: Coolify Terminal
+
+⚠️ Important: After configuring your domain in Coolify and setting up SSL, remove these temporary ports:
+```bash
+ssh your-user@your-vps-host 'sudo ufw delete allow 8000/tcp && sudo ufw delete allow 6001/tcp && sudo ufw delete allow 6002/tcp'
+```
+
+These ports should only be open during initial setup. Once you've configured your domain and SSL in Coolify, all traffic should go through ports 80/443.
 
 ## 📋 What Gets Installed
 
@@ -85,6 +96,7 @@ ssh your-user@your-vps-host 'sudo sed -i "s/PasswordAuthentication yes/PasswordA
 - unattended-upgrades
 - Docker & Docker Compose
 - Essential system utilities
+- Coolify (optinal)
 
 ## ⚙️ Configuration Details
 
@@ -154,10 +166,18 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## ⭐ Support
+## 💪 Support This Project
 
-If you find this useful, please give it a star!
+Please give it a ⭐!
+
+If you find this project useful and are looking for a VPS provider, consider using my affiliate link:
+
+- [Get a Netcup VPS](https://www.netcup.com/en/?ref=223843) - Starting from €3.99/month
+- Excellent performance and reliability
+- Perfect for running this setup
+
+> 🙏 Using this link supports the maintenance and development of this project at no extra cost to you.
 
 ## 🔐 Security
 
-If you discover any security issues, please send an email to [your-email] instead of using the issue tracker.
+If you discover any security issues, please send an email to ligno.blades@gmail.com instead of using the issue tracker.
