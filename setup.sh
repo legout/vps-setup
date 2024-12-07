@@ -164,4 +164,4 @@ if [ "${INSTALL_COOLIFY}" = "true" ]; then
 fi
 echo ""
 echo "==================================="
-echo "Setup completed!"
+echo "Setup completed! "
