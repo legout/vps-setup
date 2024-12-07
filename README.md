@@ -57,6 +57,27 @@ SSH_PUBLIC_KEY: ssh-rsa AAAAB3NzaC1... john@localhost
 ### 3. Deploy
 The setup will automatically deploy when you push to the main branch, or you can manually trigger it from the Actions tab.
 
+### 4. Post-Setup Security Steps
+
+After the GitHub Action completes successfully:
+
+1. Test SSH key-based login:
+```bash
+ssh your-user@your-vps-host
+```
+
+2. If SSH key access works, disable password authentication:
+```bash
+ssh your-user@your-vps-host 'sudo sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config && sudo systemctl restart sshd'
+```
+
+⚠️ Important:
+- Only disable password authentication after confirming SSH key access works
+- Keep a backup of your SSH private key
+- Store your VPS root password securely (in case of emergencies)
+- Monitor the GitHub Actions logs for the setup result
+
+
 ## 📋 What Gets Installed
 
 - UFW (Uncomplicated Firewall)
@@ -91,25 +112,6 @@ The setup will automatically deploy when you push to the main branch, or you can
 - Root login disabled
 - Password authentication enabled. For security reasons you should disable it after successfull setup (see [Post-Setup Security Steps](#4-post-setup-security-steps) below)
 
-### 4. Post-Setup Security Steps
-
-After the GitHub Action completes successfully:
-
-1. Test SSH key-based login:
-```bash
-ssh your-user@your-vps-host
-```
-
-2. If SSH key access works, disable password authentication:
-```bash
-ssh your-user@your-vps-host 'sudo sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config && sudo systemctl restart sshd'
-```
-
-⚠️ Important:
-- Only disable password authentication after confirming SSH key access works
-- Keep a backup of your SSH private key
-- Store your VPS root password securely (in case of emergencies)
-- Monitor the GitHub Actions logs for the setup result
 
 ## 🛠️ Customization
 
