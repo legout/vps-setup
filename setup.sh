@@ -56,7 +56,7 @@ chmod 600 /home/$NEW_USER/.ssh/authorized_keys
 chown -R $NEW_USER:$NEW_USER /home/$NEW_USER/.ssh
 
 # Configure SSH
-sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
 sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
 
