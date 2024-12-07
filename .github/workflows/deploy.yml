@@ -14,6 +14,7 @@ jobs:
       - name: Create setup script with secrets
         run: |
           sed -i "s/NEW_USER=\"youruser\"/NEW_USER=\"${{ secrets.VPS_USER }}\"/" setup.sh
+          sed -i "s/NEW_USER_PASSWORD=\"your-secure-password\"/NEW_USER_PASSWORD=\"${{ secrets.VPS_USER_PASSWORD }}\"/" setup.sh
           sed -i "s/SSH_PUBLIC_KEY=\"your-public-key-content\"/SSH_PUBLIC_KEY=\"${{ secrets.SSH_PUBLIC_KEY }}\"/" setup.sh
 
       - name: Deploy to VPS
@@ -39,3 +40,9 @@ jobs:
             # Cleanup
             cd /
             rm -rf $TEMP_DIR
+
+      - name: Post-setup instructions
+          run: |
+            echo "🎉 Setup completed!"
+            echo "⚠️ IMPORTANT: After verifying SSH key access works, disable password authentication:"
+            echo "ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} 'sudo sed -i \"s/PasswordAuthentication yes/PasswordAuthentication no/\" /etc/ssh/sshd_config && sudo systemctl restart sshd'"

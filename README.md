@@ -32,10 +32,27 @@ First, fork this repository and make it private to safely store your configurati
 ### 2. Configure GitHub Secrets
 In your forked repository, go to Settings > Secrets and variables > Actions and add the following secrets:
 
-- `VPS_HOST`: Your VPS IP address
+- `VPS_HOST`: Your VPS IP address or hostname
 - `VPS_ROOT_PASSWORD`: Initial root password
 - `VPS_USER`: Desired username for the non-root user
+- `VPS_USER_PASSWORD`: Password for the new user
 - `SSH_PUBLIC_KEY`: Your SSH public key content (from `~/.ssh/id_rsa.pub`)
+
+Example values:
+```bash
+VPS_HOST: 123.456.789.0
+VPS_ROOT_PASSWORD: your-initial-root-password
+VPS_USER: john
+VPS_USER_PASSWORD: your-secure-user-password
+SSH_PUBLIC_KEY: ssh-rsa AAAAB3NzaC1... john@localhost
+```
+
+⚠️ Security Note:
+- Never commit these values directly to the repository
+- Always use GitHub Secrets for sensitive information
+- Use strong passwords for both root and user accounts
+- Keep your SSH private key secure
+
 
 ### 3. Deploy
 The setup will automatically deploy when you push to the main branch, or you can manually trigger it from the Actions tab.
@@ -72,7 +89,27 @@ The setup will automatically deploy when you push to the main branch, or you can
 ### SSH Security
 - Key-based authentication only
 - Root login disabled
-- Password authentication disabled
+- Password authentication enabled. For security reasons you should disable it after successfull setup (see [Post-Setup Security Steps](#4-post-setup-security-steps) below)
+
+### 4. Post-Setup Security Steps
+
+After the GitHub Action completes successfully:
+
+1. Test SSH key-based login:
+```bash
+ssh your-user@your-vps-host
+```
+
+2. If SSH key access works, disable password authentication:
+```bash
+ssh your-user@your-vps-host 'sudo sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config && sudo systemctl restart sshd'
+```
+
+⚠️ Important:
+- Only disable password authentication after confirming SSH key access works
+- Keep a backup of your SSH private key
+- Store your VPS root password securely (in case of emergencies)
+- Monitor the GitHub Actions logs for the setup result
 
 ## 🛠️ Customization
 
