@@ -31,10 +31,53 @@ This repository contains automation scripts to set up a secure Debian-based VPS 
 
 ## 🚀 Usage
 
-### 1. Fork this Repository
-First, fork this repository and make it private to safely store your configurations.
+There are two options on how to use this script:
 
-### 2. Configure GitHub Secrets
+1. Run the (interactive) setup script (`setup-interactive.sh`) on your local machine or vps.
+
+2. Duplicate this repository, configure the variables as Secrets and use the included github action (`.github/workflows/deploy.yml`) to automatically run this script on your VPS when you push your updates.
+
+### Option 1. Run the script
+
+
+You can run this script on your local machine or vps. It is necessary, that you have root ssh access to your remote VPS. 
+
+`VPS_HOST` ist your vps hostname or ip adress.
+
+a) On your locak machine
+```bash
+ssh root@VPS_HOST "bash <(curl -s https://raw.githubusercontent.com/legout/vps-setup/refs/heads/main/setup-interactive.sh)"
+```
+b) On your VPS
+```bash
+ssh root@VPS_HOST
+
+# you are on your remote VPS now
+bash <(curl -s https://raw.githubusercontent.com/legout/vps-setup/refs/heads/main/setup-interactive.sh)
+```
+
+### Option 2: GitHub Action
+#### 1. Duplicate this Repository
+Duplicate this repository and make it private to safely store your configurations.
+
+1.
+```bash
+git clone --bare https://github.com/legout/vps-setup.git
+```
+2.
+```bash
+cd vps-setup
+git push --mirror https://github.com/<your-github-username>/vps-setup.git
+```
+3.
+```bash
+cd ..
+rm -r vps-setup
+git clone https://github.com/<your-github-username>/vps-setup.git
+```
+
+
+#### 2. Configure GitHub Secrets
 In your forked repository, go to Settings > Secrets and variables > Actions and add the following secrets:
 
 - `VPS_HOST`: Your VPS IP address or hostname
@@ -52,10 +95,10 @@ In your forked repository, go to Settings > Secrets and variables > Actions and 
 - Use strong passwords for both root and user accounts
 - Keep your SSH private key secure
 
-### 3. Deploy
+#### 3. Deploy
 The setup will automatically deploy when you push to the main branch, or you can manually trigger it from the Actions tab.
 
-### 4. Post-Setup Security Steps
+#### 4. Post-Setup Security Steps
 
 After the GitHub Action completes successfully:
 
@@ -75,7 +118,7 @@ ssh your-user@your-vps-host 'sudo sed -i "s/PasswordAuthentication yes/PasswordA
 - Store your VPS root password securely (in case of emergencies)
 - Monitor the GitHub Actions logs for the setup result
 
-#### Coolify Configuration
+##### Coolify Configuration
 
 The setup includes an optional Coolify installation with temporary open ports:
 - 8000/tcp: Coolify Web UI
@@ -89,7 +132,7 @@ ssh your-user@your-vps-host 'sudo ufw delete allow 8000/tcp && sudo ufw delete a
 
 These ports should only be open during initial setup. Once you've configured your domain and SSL in Coolify, all traffic should go through ports 80/443.
 
-## 📋 What Gets Installed
+### 📋 What Gets Installed
 
 - UFW (Uncomplicated Firewall)
 - fail2ban
