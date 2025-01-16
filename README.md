@@ -44,7 +44,7 @@ You can run this script on your local machine or vps. It is necessary, that you 
 
 `VPS_HOST` ist your vps hostname or ip adress.
 
-a) On your locak machine
+a) On your local machine
 ```bash
 ssh root@VPS_HOST "bash <(curl -s https://raw.githubusercontent.com/legout/vps-setup/refs/heads/main/setup-interactive.sh)"
 ```
